@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#FF6B35">
+  <title>GymTracker</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══════════════════════════════════════════════════════════ HOME -->
+  <div id="screen-home" class="screen">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h1>GymTracker 🏋️</h1>
+        <small id="home-date"></small>
+      </div>
+      <button class="topbar-action" onclick="openHistory()">Storico</button>
+    </div>
+    <div class="scroll pb16">
+      <div class="section-label">Inizia Allenamento</div>
+      <div class="cards-list">
+        <div class="card day-push" onclick="startWorkout('PUSH')">
+          <div class="card-row">
+            <span class="card-icon">💪</span>
+            <div class="card-body">
+              <strong>Giorno 1 — Push</strong>
+              <span>Petto, Spalle, Tricipiti</span>
+            </div>
+            <span class="card-chevron">›</span>
+          </div>
+        </div>
+        <div class="card day-pull" onclick="startWorkout('PULL')">
+          <div class="card-row">
+            <span class="card-icon">🔽</span>
+            <div class="card-body">
+              <strong>Giorno 2 — Pull</strong>
+              <span>Schiena, Bicipiti</span>
+            </div>
+            <span class="card-chevron">›</span>
+          </div>
+        </div>
+        <div class="card day-full" onclick="startWorkout('FULL')">
+          <div class="card-row">
+            <span class="card-icon">⚡</span>
+            <div class="card-body">
+              <strong>Giorno 3 — Full Upper + Core</strong>
+              <span>Full Body Upper + Core</span>
+            </div>
+            <span class="card-chevron">›</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Cardio</div>
+      <div class="cards-list">
+        <div class="card" onclick="openCardio()">
+          <div class="card-row">
+            <span class="card-icon">🏊&nbsp;🚴&nbsp;🚣</span>
+            <div class="card-body">
+              <strong>Cardio</strong>
+              <span>Nuoto · Cyclette · Vogatore</span>
+            </div>
+            <span class="card-chevron">›</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="recent-section">
+        <div class="section-label">Ultime sessioni</div>
+        <div id="recent-sessions" class="cards-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ WORKOUT -->
+  <div id="screen-workout" class="screen">
+    <div class="topbar">
+      <button class="topbar-back" onclick="backFromWorkout()">‹</button>
+      <div class="topbar-title">
+        <h1 id="workout-title"></h1>
+        <small id="workout-subtitle"></small>
+      </div>
+      <button class="topbar-action" onclick="openFinishDialog()">Fine ✓</button>
+    </div>
+    <div id="rest-bar" class="rest-timer" style="display:none">
+      <span id="rest-text" class="rest-timer-text"></span>
+      <button class="rest-timer-stop" onclick="stopRestTimer()">⏹</button>
+    </div>
+    <div class="warmup-banner" id="workout-warmup"></div>
+    <div class="scroll pb16" style="padding-top:10px">
+      <div id="exercises-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ HISTORY -->
+  <div id="screen-history" class="screen">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goHome()">‹</button>
+      <div class="topbar-title"><h1>Storico Allenamenti</h1></div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item"><strong id="hist-push">0</strong><small>Push</small></div>
+      <div class="stat-item"><strong id="hist-pull">0</strong><small>Pull</small></div>
+      <div class="stat-item"><strong id="hist-full">0</strong><small>Full</small></div>
+      <div class="stat-item"><strong id="hist-tot">0</strong><small>Totale</small></div>
+    </div>
+    <div class="scroll pb16" style="padding:12px 16px">
+      <div id="history-list" class="cards-list"></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ SESSION DETAIL -->
+  <div id="screen-detail" class="screen">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goHome()">‹</button>
+      <div class="topbar-title"><h1 id="detail-title"></h1></div>
+    </div>
+    <div id="detail-meta" class="detail-meta"></div>
+    <div class="scroll pb16" style="padding-top:12px">
+      <div id="detail-exercises"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ CARDIO -->
+  <div id="screen-cardio" class="screen">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goHome()">‹</button>
+      <div class="topbar-title"><h1>Cardio</h1></div>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="NUOTO" onclick="switchTab('NUOTO')">🏊 Nuoto</button>
+      <button class="tab-btn" data-tab="CYCLETTE" onclick="switchTab('CYCLETTE')">🚴 Cyclette</button>
+      <button class="tab-btn" data-tab="VOGATORE" onclick="switchTab('VOGATORE')">🚣 Vogatore</button>
+    </div>
+    <div id="cardio-stats" class="cardio-stats"></div>
+    <div class="scroll pb16" style="padding:12px 16px">
+      <div id="cardio-list" class="cards-list"></div>
+    </div>
+    <button class="fab" onclick="openAddCardio()">＋</button>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ═══════════════════════════════════════ DIALOG: Add Set -->
+<div id="overlay-set" class="overlay hidden" onclick="if(event.target===this)closeSetDialog()">
+  <div class="dialog">
+    <h3 id="dlg-set-title">Aggiungi serie</h3>
+    <div class="field">
+      <label>Ripetizioni *</label>
+      <input id="dlg-reps" type="number" inputmode="numeric" placeholder="es. 12" min="1">
+    </div>
+    <div class="field">
+      <label>Peso (kg) — lascia 0 per corpo libero</label>
+      <input id="dlg-weight" type="number" inputmode="decimal" placeholder="es. 40" min="0" step="0.5">
+    </div>
+    <div class="field">
+      <label>Recupero (secondi)</label>
+      <input id="dlg-rest" type="number" inputmode="numeric" placeholder="75" min="0">
+    </div>
+    <div class="field">
+      <label>Note (opzionale)</label>
+      <input id="dlg-set-notes" type="text" placeholder="es. difficile, tecnica ok…">
+    </div>
+    <div class="dialog-actions">
+      <button class="btn-secondary" onclick="closeSetDialog()">Annulla</button>
+      <button class="btn-primary" onclick="saveSet()">Salva serie ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ DIALOG: Finish Session -->
+<div id="overlay-finish" class="overlay hidden" onclick="if(event.target===this)closeFinishDialog()">
+  <div class="dialog">
+    <h3>Termina sessione 🏁</h3>
+    <div class="field">
+      <label>Note finali (opzionale)</label>
+      <input id="dlg-finish-notes" type="text" placeholder="es. buona sessione, aumentare pesi…">
+    </div>
+    <div class="dialog-actions">
+      <button class="btn-secondary" onclick="closeFinishDialog()">Annulla</button>
+      <button class="btn-primary" onclick="finishSession()">Termina ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ DIALOG: Add Cardio -->
+<div id="overlay-cardio" class="overlay hidden" onclick="if(event.target===this)closeCardioDialog()">
+  <div class="dialog">
+    <h3>Nuova sessione cardio</h3>
+    <div class="field">
+      <label>Tipo</label>
+      <div id="dlg-cardio-type" class="chip-group">
+        <button class="chip" data-type="NUOTO" onclick="selectCardioType(this,'NUOTO')">🏊 Nuoto</button>
+        <button class="chip" data-type="CYCLETTE" onclick="selectCardioType(this,'CYCLETTE')">🚴 Cyclette</button>
+        <button class="chip" data-type="VOGATORE" onclick="selectCardioType(this,'VOGATORE')">🚣 Vogatore</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Durata (minuti) *</label>
+      <input id="dlg-duration" type="number" inputmode="numeric" placeholder="es. 30" min="1">
+    </div>
+    <div class="field">
+      <label>Distanza (metri)</label>
+      <input id="dlg-distance" type="number" inputmode="numeric" placeholder="es. 1500">
+    </div>
+    <div class="field">
+      <label>Frequenza cardiaca media (bpm)</label>
+      <input id="dlg-hr" type="number" inputmode="numeric" placeholder="es. 130">
+    </div>
+    <div class="field">
+      <label>Calorie bruciate</label>
+      <input id="dlg-calories" type="number" inputmode="numeric" placeholder="es. 250">
+    </div>
+
+    <!-- Cyclette only -->
+    <div id="fields-cyclette" class="fields-conditional">
+      <div class="field">
+        <label>Livello resistenza</label>
+        <input id="dlg-resistance" type="number" inputmode="numeric" placeholder="es. 8" min="1" max="20">
+      </div>
+    </div>
+
+    <!-- Nuoto only -->
+    <div id="fields-nuoto" class="fields-conditional">
+      <div class="field">
+        <label>Numero vasche</label>
+        <input id="dlg-laps" type="number" inputmode="numeric" placeholder="es. 30">
+      </div>
+      <div class="field">
+        <label>Stile</label>
+        <input id="dlg-style" type="text" placeholder="es. libero, rana, misto…">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Note</label>
+      <input id="dlg-cardio-notes" type="text" placeholder="es. piscina scoperta, bici reclinata…">
+    </div>
+    <div class="dialog-actions">
+      <button class="btn-secondary" onclick="closeCardioDialog()">Annulla</button>
+      <button class="btn-primary" onclick="saveCardio()">Salva ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ Confirm Delete -->
+<div id="confirm-overlay" class="confirm-del hidden">
+  <div class="confirm-box">
+    <strong id="confirm-title"></strong>
+    <p id="confirm-msg"></p>
+    <div class="actions">
+      <button class="btn-secondary" onclick="cancelDelete()" style="flex:1">Annulla</button>
+      <button class="btn-danger" onclick="executeDelete()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/app.js"></script>
+</body>
+</html>
