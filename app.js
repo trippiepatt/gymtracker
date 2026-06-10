@@ -596,7 +596,7 @@ window.addEventListener('popstate', () => {
 // ══════════════════════════════════════════════════════════════════════════
 (async function init() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
   await renderHome();
   showScreen('home');

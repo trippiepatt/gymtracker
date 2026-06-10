@@ -2,7 +2,7 @@
   "name": "GymTracker",
   "short_name": "GymTracker",
   "description": "Traccia i tuoi allenamenti in palestra, piscina e cyclette",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#FF6B35",
